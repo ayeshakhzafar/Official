@@ -31,7 +31,12 @@ jobs:
 
       - name: Start the server
         run: |
-          nohup node index.js &
+          echo "Starting server..."
+          node index.js > server.log 2>&1 &
+          sleep 3
+          echo "Checking server logs..."
+          cat server.log
+
 
       - name: Wait for server to be ready
         shell: pwsh
