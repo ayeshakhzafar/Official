@@ -64,10 +64,13 @@ app.get("/api/books", authMiddleware, (req, res) => {
   res.json(filteredBooks);
 });
 
-// Use a dynamic port to avoid conflicts in tests
-const PORT = process.env.PORT || 0;
-const server = app.listen(PORT, () => console.log(`Server running on port ${server.address().port}`));
+// Force server to bind to 127.0.0.1 to avoid IPv6 issues
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, "127.0.0.1", () => {
+  console.log(`✅ Server running on http://127.0.0.1:${PORT}`);
+}).on("error", (err) => {
+  console.error("❌ Server failed to start:", err);
+});
 
 // Export both app and server to properly close it in tests
 module.exports = { app, server };
-
