@@ -30,13 +30,13 @@ jobs:
           echo "JWT_SECRET=mysecretkey" >> .env
 
       - name: Start the server
+        shell: pwsh
         run: |
           echo "Starting server..."
-          node index.js > server.log 2>&1 &
-          sleep 3
+          Start-Process -NoNewWindow -FilePath "node" -ArgumentList "index.js"
+          Start-Sleep -Seconds 5
           echo "Checking server logs..."
-          cat server.log
-
+          Get-Content server.log -Tail 20 -Wait
 
       - name: Wait for server to be ready
         shell: pwsh
@@ -46,19 +46,23 @@ jobs:
           for ($i=0; $i -lt $retries; $i++) {
             try {
               Invoke-WebRequest -Uri "http://localhost:5000/api/books" -UseBasicParsing
-              echo "Server is ready!"
+              echo "✅ Server is ready!"
               exit 0
             } catch {
-              echo "Server not ready, retrying in 3 seconds..."
+              echo "❌ Server not ready, retrying in 3 seconds..."
               Start-Sleep -Seconds 3
             }
           }
-          echo "Server failed to start"
+          echo "❌ Server failed to start"
           exit 1
 
       - name: Run the test script
         run: node test.js
 
       - name: Stop the server
-        run: pkill -f "node index.js" || echo "Server already stopped"
+        shell: pwsh
+        run: |
+          echo "Stopping server..."
+          Get-Process | Where-Object { $_.ProcessName -eq "node" } | Stop-Process -Force
+
 
