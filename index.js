@@ -64,7 +64,10 @@ app.get("/api/books", authMiddleware, (req, res) => {
   res.json(filteredBooks);
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Use a dynamic port to avoid conflicts in tests
+const PORT = process.env.PORT || 0;
+const server = app.listen(PORT, () => console.log(`Server running on port ${server.address().port}`));
 
-module.exports = app; 
+// Export both app and server to properly close it in tests
+module.exports = { app, server };
+
