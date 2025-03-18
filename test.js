@@ -1,5 +1,5 @@
 const request = require("supertest");
-const app = require("./index");
+const { app, server } = require("./index"); // Import both app & server
 
 describe("Book Lending System", () => {
   let token;
@@ -10,6 +10,7 @@ describe("Book Lending System", () => {
       email: "test@example.com",
       password: "password123",
     });
+    console.log("Register Response:", res.body); // Debugging
     expect(res.statusCode).toBe(201);
   });
 
@@ -18,6 +19,7 @@ describe("Book Lending System", () => {
       email: "test@example.com",
       password: "password123",
     });
+    console.log("Login Response:", res.body); // Debugging
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("token");
     token = res.body.token;
@@ -34,6 +36,7 @@ describe("Book Lending System", () => {
         borrower: "John Doe",
         dueDate: "2025-03-30",
       });
+    console.log("Borrow Book Response:", res.body); // Debugging
     expect(res.statusCode).toBe(201);
   });
 
@@ -41,7 +44,13 @@ describe("Book Lending System", () => {
     const res = await request(app)
       .get("/api/books")
       .set("Authorization", token);
+    console.log("Get Books Response:", res.body); // Debugging
     expect(res.statusCode).toBe(200);
     expect(res.body.length).toBeGreaterThan(0);
+  });
+
+  // Ensure the server is closed after tests to prevent port conflicts
+  afterAll(() => {
+    server.close();
   });
 });
