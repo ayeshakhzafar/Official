@@ -28,4 +28,4 @@ jobs:
           echo "JWT_SECRET=mysecretkey" >> .env
 
       - name: Run tests
-        run: npm test
+        run: npm test  # ✅ Use npm test instead of node test.js
