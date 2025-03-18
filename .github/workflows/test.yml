@@ -1,0 +1,51 @@
+
+name: Node.js CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create .env file
+        run: |
+          echo "PORT=5000" > .env
+          echo "JWT_SECRET=mysecretkey" >> .env
+
+      - name: Start the server
+        run: |
+          start /B cmd /C "node index.js"
+      
+      - name: Wait for server to be ready
+        run: |
+          echo "Waiting for server..."
+          for /L %%i in (1,1,15) do (
+            curl --silent --fail http://localhost:5000/api/books && exit /b 0
+            echo "Server not ready yet..."
+            timeout /t 2 >nul
+          )
+          echo "Server failed to start" & exit /b 1
+
+      - name: Run the test script
+        run: node test.js  # ✅ Runs test.js after confirming server is ready
+
+      - name: Stop the server
+        run: taskkill /IM node.exe /F || echo "Server already stopped"
