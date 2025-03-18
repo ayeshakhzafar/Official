@@ -34,13 +34,20 @@ jobs:
           nohup node index.js &
 
       - name: Wait for server to be ready
+        shell: pwsh
         run: |
           echo "Waiting for server..."
-          for i in {1..10}; do
-            curl --silent --fail http://localhost:5000/api/books && exit 0
-            echo "Server not ready, retrying in 3 seconds..."
-            sleep 3
-          done
+          $retries = 10
+          for ($i=0; $i -lt $retries; $i++) {
+            try {
+              Invoke-WebRequest -Uri "http://localhost:5000/api/books" -UseBasicParsing
+              echo "Server is ready!"
+              exit 0
+            } catch {
+              echo "Server not ready, retrying in 3 seconds..."
+              Start-Sleep -Seconds 3
+            }
+          }
           echo "Server failed to start"
           exit 1
 
