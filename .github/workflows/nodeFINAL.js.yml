@@ -1,3 +1,6 @@
+
+
+
 name: Node.js CI
 
 on:
@@ -24,45 +27,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Create .env file
-        run: |
-          echo "PORT=5000" > .env
-          echo "JWT_SECRET=mysecretkey" >> .env
-
       - name: Start the server
         shell: pwsh
         run: |
           echo "Starting server..."
           Start-Process -NoNewWindow -FilePath "node" -ArgumentList "index.js"
-          Start-Sleep -Seconds 5
-          echo "Checking server logs..."
-          Get-Content server.log -Tail 20 -Wait
-
-      - name: Wait for server to be ready
-        shell: pwsh
-        run: |
-          echo "Waiting for server..."
-          $retries = 10
-          for ($i=0; $i -lt $retries; $i++) {
-            try {
-              Invoke-WebRequest -Uri "http://localhost:5000/api/books" -UseBasicParsing
-              echo "✅ Server is ready!"
-              exit 0
-            } catch {
-              echo "❌ Server not ready, retrying in 3 seconds..."
-              Start-Sleep -Seconds 3
-            }
-          }
-          echo "❌ Server failed to start"
-          exit 1
+          Start-Sleep -Seconds 5  # Wait for the server to start
 
       - name: Run the test script
         run: node test.js
-
-      - name: Stop the server
-        shell: pwsh
-        run: |
-          echo "Stopping server..."
-          Get-Process | Where-Object { $_.ProcessName -eq "node" } | Stop-Process -Force
-
-
