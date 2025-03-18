@@ -2,30 +2,34 @@ name: Node.js CI
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Create .env file
+      - name: Start the server
         run: |
-          echo "PORT=5000" >> .env
-          echo "JWT_SECRET=mysecretkey" >> .env
+          start /B cmd /C "node index.js"
 
-      - name: Run tests
-        run: npm test  # ✅ Use npm test instead of node test.js
+      - name: Wait for server to start
+        run: timeout /t 5
+
+      - name: Run a basic Node.js script
+        run: node testScript.js
