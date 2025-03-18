@@ -2,14 +2,15 @@ const http = require("http");
 
 // Define the API endpoint to test
 const options = {
-  hostname: "localhost",
-  port: 5000,  // Make sure this matches your server port
+  hostname: "127.0.0.1", // Use IPv4 instead of IPv6 (::1)
+  port: 5000,
   path: "/api/books",
   method: "GET",
   headers: {
     "Content-Type": "application/json",
   },
 };
+
 
 // Send the request
 const req = http.request(options, (res) => {
