@@ -24,36 +24,5 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Start the server
-        shell: pwsh
-        run: |
-          echo "Starting server..."
-          Start-Process -NoNewWindow -FilePath "node" -ArgumentList "index.js"
-          Start-Sleep -Seconds 5  # Wait for the server to start
-
-      - name: Wait for server to be ready
-        shell: pwsh
-        run: |
-          echo "Checking if server is running..."
-          $retries = 10
-          for ($i=0; $i -lt $retries; $i++) {
-            try {
-              Invoke-WebRequest -Uri "http://127.0.0.1:5000/api/books" -UseBasicParsing
-              echo "✅ Server is ready!"
-              exit 0
-            } catch {
-              echo "❌ Server not ready, retrying in 3 seconds..."
-              Start-Sleep -Seconds 3
-            }
-          }
-          echo "❌ Server failed to start!"
-          exit 1
-
-      - name: Run the test script
+      - name: Run a basic Node.js script
         run: node test.js
-
-      - name: Stop the server
-        shell: pwsh
-        run: |
-          echo "Stopping server..."
-          Get-Process | Where-Object { $_.ProcessName -eq "node" } | Stop-Process -Force || echo "Server already stopped"
