@@ -1,31 +1,54 @@
-const http = require("http");
+// test.js
+const request = require("supertest");
+const app = require("./index");
 
-const options = {
-  hostname: "127.0.0.1",
-  port: 5000,
-  path: "/api/books",
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-  },
-};
+describe("Book Lending System API", () => {
+    test("Should register a new user", async () => {
+        const res = await request(app)
+            .post("/register")
+            .send({ username: "testUser", password: "password" });
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe("User registered successfully");
+    });
 
-const req = http.request(options, (res) => {
-  let data = "";
-  
-  res.on("data", (chunk) => {
-    data += chunk;
-  });
+    test("Should login successfully", async () => {
+        await request(app)
+            .post("/register")
+            .send({ username: "testUser2", password: "password" });
 
-  res.on("end", () => {
-    console.log("Get All Books Response:", data);
-    process.exit(0); 
-  });
+        const res = await request(app)
+            .post("/login")
+            .send({ username: "testUser2", password: "password" });
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe("Login successful");
+    });
+
+    test("Should lend a book", async () => {
+        const res = await request(app)
+            .post("/lend")
+            .send({ title: "1984", author: "George Orwell", borrower: "Alice", dueDate: "2025-04-01", category: "Fiction" });
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe("Book lent successfully");
+    });
+
+    test("Should fetch all borrowed books", async () => {
+        const res = await request(app)
+            .get("/books");
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+    });
+
+    test("Should filter borrowed books by borrower", async () => {
+        await request(app)
+            .post("/lend")
+            .send({ title: "Brave New World", author: "Aldous Huxley", borrower: "Bob", dueDate: "2025-05-01", category: "Fiction" });
+
+        const res = await request(app)
+            .get("/books")
+            .query({ borrower: "Bob" });
+
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(1);
+        expect(res.body[0].borrower).toBe("Bob");
+    });
 });
-
-req.on("error", (error) => {
-  console.error("Error:", error.message);
-  process.exit(1);
-});
-
-req.end();
