@@ -18,14 +18,14 @@ const req = http.request(options, (res) => {
   });
 
   res.on("end", () => {
-    console.log("✅ Get All Books Response:", data);
-    process.exit(0); // Exit script successfully
+    console.log("Get All Books Response:", data);
+    process.exit(0); 
   });
 });
 
 req.on("error", (error) => {
-  console.error("❌ Error:", error.message);
-  process.exit(1); // Exit with error
+  console.error("Error:", error.message);
+  process.exit(1);
 });
 
 req.end();
